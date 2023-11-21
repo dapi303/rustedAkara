@@ -19,11 +19,9 @@ fn get_messages() -> Vec<String> {
 //fn get_str_or_empty
 
 pub fn convert_to_event(message: &String) -> Result<ChatEvent, ()> {
-    //let message_regex = Regex::new(r"@From (\w+) Hi, I would like to buy your (.*) listed for (\d+) (\w+) in (\w+) \(stash tab (\w+); position: left (\d+), top (\d+)\)").unwrap();
-    let message_regex = Regex::new(r#"@From (\w+) Hi, I would like to buy your (.*) listed for (\d+) (\w+) in (\w+) \(stash tab (.*)\;.*position: left (\d+), top (\d+)\)"#).unwrap();
+    let message_regex = Regex::new(r#"^@From (\w+) Hi, I would like to buy your (.*) listed for (\d+) (\w+) in (\w+) \(stash tab (.*)\;.*position: left (\d+), top (\d+)\)$"#).unwrap();
     let found = message_regex.captures(&message);
 
-    dbg!(message);
     if found.is_some() {
         let result = found.unwrap();
         if result.len() > 7 {
@@ -35,8 +33,7 @@ pub fn convert_to_event(message: &String) -> Result<ChatEvent, ()> {
                 .map_or(0, |x| x.as_str().parse::<u32>().unwrap());
             let currency_str = result.get(4).map_or("", |x| x.as_str());
             let currency = Currency::new(currency_str);
-            println!("{currency_str}");
-            if dbg!(currency.is_err()) {
+            if currency.is_err() {
                 return Err(());
             }
             //let league = result.get(5).map_or("", |x| x.as_str());
@@ -84,28 +81,42 @@ pub fn get_events() -> Vec<ChatEvent> {
 mod tests {
     use crate::{chat::convert_to_event, models::chat_event::Currency};
 
+    const VALID_MESSAGE: &str = "@From Player1 Hi, I would like to buy your Pandemonium Peak Tricorne listed for 1 alch in Ancestor (stash tab \"~b/o 1 alch\"; position: left 2, top 3)";
+
     #[test]
-    fn valid_offer_full_check() {
-        let message = "@From Player1 Hi, I would like to buy your Pandemonium Peak Tricorne listed for 1 alch in Ancestor (stash tab \"~b/o 1 alch\"; position: left 3, top 3)";
-        let event = convert_to_event(&message.to_string()).unwrap();
+    fn valid_offer_properly_converted() {
+        let event = convert_to_event(&VALID_MESSAGE.to_string()).unwrap();
         assert_eq!(event.player, "Player1");
         assert_eq!(event.item.name, "Pandemonium Peak Tricorne");
         assert_eq!(event.item.tab, "\"~b/o 1 alch\"");
         assert_eq!(event.price.quantity, 1);
         //assert_eq!(event.price.currency, Currency::Alch);
-        assert_eq!(event.item.position, (3, 3));
+        assert_eq!(event.item.position, (2, 3));
     }
 
     #[test]
-    fn valid_offer() {
+    fn special_characters_in_player_name() {
         let message = "@From PlayerÓÓWZŻ1 Hi, I would like to buy your Pandemonium Peak Tricorne listed for 1 alch in Ancestor (stash tab \"~b/o 1 alch\"; position: left 3, top 3)";
         let event = convert_to_event(&message.to_string()).unwrap();
         assert_eq!(event.player, "PlayerÓÓWZŻ1");
     }
 
     #[test]
-    fn invalid_offer() {
+    fn invalid_offer_ignored() {
         let message = "@From Player1 blah blabh bklajsdkla sda";
+        let event = convert_to_event(&message.to_string());
+        assert!(!event.is_ok());
+    }
+
+    #[test]
+    fn offer_with_extra_text_at_end_ignored() {
+        let message = format!("{} some extra stuff", VALID_MESSAGE);
+        let event = convert_to_event(&message.to_string());
+        assert!(!event.is_ok());
+    }
+    #[test]
+    fn offer_with_extra_text_at_start_ignored() {
+        let message = format!("some extra stuff {}", VALID_MESSAGE);
         let event = convert_to_event(&message.to_string());
         assert!(!event.is_ok());
     }
