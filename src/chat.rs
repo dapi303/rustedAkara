@@ -38,10 +38,10 @@ pub fn convert_to_event(message: &String) -> Result<ChatEvent, ()> {
             }
             //let league = result.get(5).map_or("", |x| x.as_str());
             let tab = result.get(6).map_or("", |x| x.as_str());
-            let x = result
+            let col = result
                 .get(7)
                 .map_or(0, |x| x.as_str().parse::<u32>().unwrap());
-            let y = result
+            let row = result
                 .get(8)
                 .map_or(0, |x| x.as_str().parse::<u32>().unwrap());
 
@@ -50,7 +50,7 @@ pub fn convert_to_event(message: &String) -> Result<ChatEvent, ()> {
                 item: Item {
                     name: item_name.to_owned(),
                     tab: tab.to_owned(),
-                    position: (x, y),
+                    position: (col, row),
                 },
                 price: Price {
                     quantity,
@@ -79,7 +79,7 @@ pub fn get_events() -> Vec<ChatEvent> {
 
 #[cfg(test)]
 mod tests {
-    use crate::{chat::convert_to_event, models::chat_event::Currency};
+    use crate::chat::convert_to_event;
 
     const VALID_MESSAGE: &str = "@From Player1 Hi, I would like to buy your Pandemonium Peak Tricorne listed for 1 alch in Ancestor (stash tab \"~b/o 1 alch\"; position: left 2, top 3)";
 
