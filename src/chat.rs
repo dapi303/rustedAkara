@@ -5,7 +5,9 @@ use crate::models::{
 use regex::Regex;
 
 fn get_messages() -> Vec<String> {
-    return Vec::new();
+    return vec![
+"@From Player1 Hi, I would like to buy your Pandemonium Peak Tricorne listed for 1 alch in Ancestor (stash tab \"~b/o 1 alch\"; position: left 3, top 3)".to_string(),
+    ];
 }
 
 pub fn convert_to_event(message: &String) -> Result<ChatEvent, ()> {
