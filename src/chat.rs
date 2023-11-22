@@ -26,24 +26,17 @@ pub fn convert_to_event(message: &String) -> Result<ChatEvent, ()> {
         let result = found.unwrap();
         if result.len() > 7 {
             let player = &result[1];
-            //let player = result.get(1).map_or("", |x| x.as_str());
-            let item_name = result.get(2).map_or("", |x| x.as_str());
-            let quantity = result
-                .get(3)
-                .map_or(0, |x| x.as_str().parse::<u32>().unwrap());
-            let currency_str = result.get(4).map_or("", |x| x.as_str());
+            let item_name = &result[2];
+            let quantity = result[3].parse::<u32>().unwrap();
+            let currency_str = &result[4];
             let currency = Currency::new(currency_str);
             if currency.is_err() {
                 return Err(());
             }
-            //let league = result.get(5).map_or("", |x| x.as_str());
-            let tab = result.get(6).map_or("", |x| x.as_str());
-            let col = result
-                .get(7)
-                .map_or(0, |x| x.as_str().parse::<u32>().unwrap());
-            let row = result
-                .get(8)
-                .map_or(0, |x| x.as_str().parse::<u32>().unwrap());
+            //let league = &result[5];
+            let tab = &result[6];
+            let col = result[7].parse::<u32>().unwrap();
+            let row = result[8].parse::<u32>().unwrap();
 
             let event = ChatEvent {
                 player: player.to_owned(),
