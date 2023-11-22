@@ -1,6 +1,6 @@
 use super::item::Item;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Currency {
     Exalt,
     Chaos,

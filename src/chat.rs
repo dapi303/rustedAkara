@@ -4,19 +4,9 @@ use crate::models::{
 };
 use regex::Regex;
 
-//@From Player Hi, I would like to buy your Pandemonium Peak Tricorne listed for 1 alch in Ancestor (stash tab "~b/o 1 alch"; position: left 3, top 3)
 fn get_messages() -> Vec<String> {
-    return vec![
-"@From Player1 Hi, I would like to buy your Pandemonium Peak Tricorne listed for 1 alch in Ancestor (stash tab \"~b/o 1 alch\"; position: left 3, top 3)".to_string(),
-"SOme spam".to_string(),
-"@From Player2 Hi, I would like to buy your Pandemonium Peak X listed for 4 Chaos in Ancestor (stash tab \"$$$\"; position: left 2, top 1)".to_string(),
-"@From Player2 Hi, I would like to buy your Pandemonium Peak X listed for 4 Chaos in Ancestor (stash tab some_tab; position: left 2, top 1)".to_string(),
-"@From Player2 blah blah...".to_string(),
-"SOme spam".to_string(),
-    ];
+    return Vec::new();
 }
-
-//fn get_str_or_empty
 
 pub fn convert_to_event(message: &String) -> Result<ChatEvent, ()> {
     let message_regex = Regex::new(r#"^@From (\w+) Hi, I would like to buy your (.*) listed for (\d+) (\w+) in (\w+) \(stash tab (.*)\;.*position: left (\d+), top (\d+)\)$"#).unwrap();
@@ -72,7 +62,7 @@ pub fn get_events() -> Vec<ChatEvent> {
 
 #[cfg(test)]
 mod tests {
-    use crate::chat::convert_to_event;
+    use crate::{chat::convert_to_event, models::chat_event::Currency};
 
     const VALID_MESSAGE: &str = "@From Player1 Hi, I would like to buy your Pandemonium Peak Tricorne listed for 1 alch in Ancestor (stash tab \"~b/o 1 alch\"; position: left 2, top 3)";
 
@@ -83,7 +73,7 @@ mod tests {
         assert_eq!(event.item.name, "Pandemonium Peak Tricorne");
         assert_eq!(event.item.tab, "\"~b/o 1 alch\"");
         assert_eq!(event.price.quantity, 1);
-        //assert_eq!(event.price.currency, Currency::Alch);
+        assert_eq!(event.price.currency, Currency::Alch);
         assert_eq!(event.item.position, (2, 3));
     }
 
